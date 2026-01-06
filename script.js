@@ -343,17 +343,34 @@ startBtn.addEventListener('click', () => {
         stopCamera();
     }
 });
-
-snapBtn.addEventListener('click', () => {
-    if (canvas.width === 0 || canvas.height === 0) {
-        showError('Start camera first to take a snapshot!');
+function takeSnapshot() {
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+        showError('Camera not ready!');
         return;
     }
+
+    // Create snapshot canvas
+    const snapCanvas = document.createElement('canvas');
+    const snapCtx = snapCanvas.getContext('2d');
+
+    snapCanvas.width = video.videoWidth;
+    snapCanvas.height = video.videoHeight;
+
+    // Draw camera frame FIRST
+    snapCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
+
+    // Draw dress overlay canvas SECOND
+    snapCtx.drawImage(canvas, 0, 0, snapCanvas.width, snapCanvas.height);
+
+    // Download image
     const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
+    link.href = snapCanvas.toDataURL('image/png');
     link.download = `ar-tryon-${Date.now()}.png`;
     link.click();
-});
+}
+
+snapBtn.addEventListener('click', takeSnapshot);
+
 
 helpBtn.addEventListener('click', () => {
     showInfo(!infoPanel.classList.contains('show'));
